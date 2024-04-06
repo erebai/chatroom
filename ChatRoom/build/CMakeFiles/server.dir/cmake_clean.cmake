@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/server.dir/src/chatroom.cpp.o"
   "CMakeFiles/server.dir/src/chatroom.cpp.o.d"
+  "CMakeFiles/server.dir/src/main.cpp.o"
+  "CMakeFiles/server.dir/src/main.cpp.o.d"
   "CMakeFiles/server.dir/src/server.cpp.o"
   "CMakeFiles/server.dir/src/server.cpp.o.d"
   "server"

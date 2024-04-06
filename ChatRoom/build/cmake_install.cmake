@@ -1,4 +1,4 @@
-# Install script for directory: /ssd/ayb/ChatRoom
+# Install script for directory: /ssd/ayb/chatroom/ChatRoom
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/ssd/ayb/ChatRoom/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/ssd/ayb/chatroom/ChatRoom/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

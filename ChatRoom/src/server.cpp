@@ -8,17 +8,24 @@
 #include <string.h>
 
 #include <../include/utils.h>
+#include <../include/server.h>
 
 #define MAX_BUF_SIZE 1024
 #define MAX_EVENT_NUMBERS 100
 char message[MAX_BUF_SIZE];
+struct client_data
+{
+    sockaddr_in address;        //用户地址
+    char* write_buf;            //需要写的数据的位置
+    char buf[MAX_BUF_SIZE];     //读到的数据储存位置
+};
 
-bool readMessageFromClient(int epollfd,int fd){
+bool Server::readMessageFromClient(int socket){
     int m_read_idx = 0;
     int bytes_read = 0;
     while(true)
         {
-            bytes_read = recv(fd, &message + m_read_idx, MAX_BUF_SIZE - m_read_idx, 0);
+            bytes_read = recv(socket, &message + m_read_idx, MAX_BUF_SIZE - m_read_idx, 0);
             if (bytes_read == -1){
                 if (errno == EAGAIN || errno == EWOULDBLOCK)
                     break;
@@ -36,37 +43,37 @@ bool readMessageFromClient(int epollfd,int fd){
     return true;
 }
 
-void dealwithclient(int epollfd,int sockfd){
+void Server::dealwithclient(){
     sockaddr clientaddr;
     socklen_t clientaddr_len = sizeof(clientaddr);
-    int connfd = accept(sockfd,(struct sockaddr*)&clientaddr,&clientaddr_len);
-    Util::addfd(epollfd,connfd,false);
+    int connfd = accept(listenfd,(struct sockaddr*)&clientaddr,&clientaddr_len);
+    if(connfd>0){
+        printf("accpet\n");
+        Util::addfd(epollfd,connfd,false);
+    }
+    else
+        printf("Wrong\n");
 };
 
-void dealwithread(int epollfd,int fd){
+void Server::dealwithread(int socket){
     //after deal with read data,reset ontshot
     memset(&message,'\0',MAX_BUF_SIZE);
-    if(readMessageFromClient(epollfd,fd)){
+    if(readMessageFromClient(socket)){
         printf("message from clinet:%s \n",message);
-        Util::resetEpollOneShot(epollfd,fd);
+        Util::resetEpollOneShot(epollfd,socket);
     }
     else{
-        Util::removefd(epollfd,fd);
-        close(fd);
+        printf("Unexpected errors encoutered \n");
+        Util::removefd(epollfd,socket);
+        close(socket);
     }
-    
 };
 
-void dealwithwrite(int epollfd,int fd){
+void Server::dealwithwrite(int socket){
 
 };
 
-int main(int argc,char* argv[]){
-    if(argc<=3){
-        printf("Using Port:%s \n",argv[1]);
-        // printf("Using IP:%n \n",INADDR_ANY);
-    }
-    int port = atoi(argv[1]);
+void Server::listenLoop(){
     //init socket
     struct sockaddr_in address;
     bzero(&address,sizeof(address));
@@ -74,10 +81,10 @@ int main(int argc,char* argv[]){
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    int listenfd = socket(PF_INET,SOCK_STREAM,0);
+    listenfd = socket(PF_INET,SOCK_STREAM,0);
     if(listenfd == -1){
         printf("Error:Fail to create socket\n");
-        return 0;
+        return;
     }
     
     //bind
@@ -85,18 +92,19 @@ int main(int argc,char* argv[]){
     result = bind(listenfd,(struct sockaddr*)&address,sizeof(address));
     if(result == -1){
         printf("Error:Fail to bind socke\n");
-        return 0;
+        return;
     }
 
     //listen
     result = listen(listenfd,5);
     if(result == -1){
         printf("Error:Fail to create listen\n");
-        return 0;
+        return;
     }
 
     epoll_event events[MAX_EVENT_NUMBERS+1];
-    int epollfd = epoll_create(5);
+    client_data* users = new client_data[MAX_EVENT_NUMBERS];
+    epollfd = epoll_create(5);
     Util::addfd(epollfd,listenfd);
 
     while(1){
@@ -109,7 +117,7 @@ int main(int argc,char* argv[]){
             int sockfd = events[i].data.fd;
             if((sockfd == listenfd) &&(events[i].events & EPOLLIN)){
                 printf("Epoll:New client connected!\n");
-                dealwithclient(epollfd,sockfd);
+                dealwithclient();
             }
             else if(events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)){
                 printf("client disconnected!\n");
@@ -118,14 +126,17 @@ int main(int argc,char* argv[]){
             }
             else if(events[i].events & EPOLLIN){
                 printf("Epoll:message from client.\n");
-                dealwithread(epollfd,sockfd);
+                dealwithread(sockfd);
             }
             else if(events[i].events & EPOLLOUT){
-                dealwithwrite(epollfd,sockfd);
+                dealwithwrite(sockfd);
             }
         }
     }
-
     close(listenfd);
-    return 1;
+}
+
+Server::Server(int port):port(port)
+{
+
 }

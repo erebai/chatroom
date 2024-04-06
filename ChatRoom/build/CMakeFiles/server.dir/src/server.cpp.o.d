@@ -1,5 +1,6 @@
-CMakeFiles/server.dir/src/server.cpp.o: /ssd/ayb/ChatRoom/src/server.cpp \
- /usr/include/stdc-predef.h /usr/include/c++/11/iostream \
+CMakeFiles/server.dir/src/server.cpp.o: \
+ /ssd/ayb/chatroom/ChatRoom/src/server.cpp /usr/include/stdc-predef.h \
+ /usr/include/c++/11/iostream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -170,8 +171,10 @@ CMakeFiles/server.dir/src/server.cpp.o: /ssd/ayb/ChatRoom/src/server.cpp \
  /usr/include/linux/close_range.h \
  /usr/include/x86_64-linux-gnu/sys/epoll.h \
  /usr/include/x86_64-linux-gnu/bits/epoll.h /usr/include/string.h \
- /usr/include/strings.h /ssd/ayb/ChatRoom/include/../include/utils.h \
+ /usr/include/strings.h \
+ /ssd/ayb/chatroom/ChatRoom/include/../include/utils.h \
  /usr/include/fcntl.h /usr/include/x86_64-linux-gnu/bits/fcntl.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/linux/falloc.h /usr/include/x86_64-linux-gnu/bits/stat.h \
- /usr/include/x86_64-linux-gnu/bits/struct_stat.h
+ /usr/include/x86_64-linux-gnu/bits/struct_stat.h \
+ /ssd/ayb/chatroom/ChatRoom/include/../include/server.h

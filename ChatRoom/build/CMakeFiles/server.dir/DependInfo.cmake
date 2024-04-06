@@ -8,8 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/ssd/ayb/ChatRoom/src/chatroom.cpp" "CMakeFiles/server.dir/src/chatroom.cpp.o" "gcc" "CMakeFiles/server.dir/src/chatroom.cpp.o.d"
-  "/ssd/ayb/ChatRoom/src/server.cpp" "CMakeFiles/server.dir/src/server.cpp.o" "gcc" "CMakeFiles/server.dir/src/server.cpp.o.d"
+  "/ssd/ayb/chatroom/ChatRoom/src/chatroom.cpp" "CMakeFiles/server.dir/src/chatroom.cpp.o" "gcc" "CMakeFiles/server.dir/src/chatroom.cpp.o.d"
+  "/ssd/ayb/chatroom/ChatRoom/src/main.cpp" "CMakeFiles/server.dir/src/main.cpp.o" "gcc" "CMakeFiles/server.dir/src/main.cpp.o.d"
+  "/ssd/ayb/chatroom/ChatRoom/src/server.cpp" "CMakeFiles/server.dir/src/server.cpp.o" "gcc" "CMakeFiles/server.dir/src/server.cpp.o.d"
   )
 
 # Targets to which this target links.
