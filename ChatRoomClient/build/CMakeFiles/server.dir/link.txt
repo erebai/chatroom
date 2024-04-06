@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -g -rdynamic CMakeFiles/server.dir/src/client.cpp.o -o server 

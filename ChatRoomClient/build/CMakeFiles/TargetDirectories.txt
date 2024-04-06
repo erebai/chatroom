@@ -1,0 +1,3 @@
+/ssd/ayb/ChatRoomClient/build/CMakeFiles/client.dir
+/ssd/ayb/ChatRoomClient/build/CMakeFiles/edit_cache.dir
+/ssd/ayb/ChatRoomClient/build/CMakeFiles/rebuild_cache.dir
