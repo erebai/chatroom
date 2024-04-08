@@ -48,8 +48,8 @@ void Server::dealwithclient(int socket){
     else printf("fail to accept\n");
     
     if(readMessageFromClient(connfd)){
-        memcpy(clients[connfd].username,clients[connfd].buf,MAX_USERNAME_LENGTH);
-        printf("New client connected! UserID:%s \n",clients[connfd].username);
+        memcpy(clients[connfd].username,clients[connfd].buf,sizeof(clients[connfd].username));
+        printf("New client connected! UserID:%s \n",clients[connfd].buf);
     }
     else{
         printf("wrong!!!!!!!!\n");
