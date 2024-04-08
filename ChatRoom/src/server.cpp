@@ -9,23 +9,15 @@
 
 #include <../include/utils.h>
 #include <../include/server.h>
-
-#define MAX_BUF_SIZE 1024
-#define MAX_EVENT_NUMBERS 100
-char message[MAX_BUF_SIZE];
-struct client_data
-{
-    sockaddr_in address;        //用户地址
-    char* write_buf;            //需要写的数据的位置
-    char buf[MAX_BUF_SIZE];     //读到的数据储存位置
-};
+using namespace std;
 
 bool Server::readMessageFromClient(int socket){
+    memset(clients[socket].buf,0,sizeof(clients[socket].buf));
     int m_read_idx = 0;
     int bytes_read = 0;
     while(true)
         {
-            bytes_read = recv(socket, &message + m_read_idx, MAX_BUF_SIZE - m_read_idx, 0);
+            bytes_read = recv(socket, &clients[socket].buf + m_read_idx, MAX_BUF_SIZE - m_read_idx, 0);
             if (bytes_read == -1){
                 if (errno == EAGAIN || errno == EWOULDBLOCK)
                     break;
@@ -43,38 +35,55 @@ bool Server::readMessageFromClient(int socket){
     return true;
 }
 
-void Server::dealwithclient(){
-    sockaddr clientaddr;
+void Server::dealwithclient(int socket){
+    struct sockaddr_in clientaddr;
     socklen_t clientaddr_len = sizeof(clientaddr);
     int connfd = accept(listenfd,(struct sockaddr*)&clientaddr,&clientaddr_len);
     if(connfd>0){
-        printf("accpet\n");
-        Util::addfd(epollfd,connfd,false);
+        Util::addfd(epollfd,connfd);
+        clients[connfd].address = clientaddr;
+        clients[connfd].socket = connfd;
+        num_users++;
     }
-    else
-        printf("Wrong\n");
+    else printf("fail to accept\n");
+    
+    if(readMessageFromClient(connfd)){
+        memcpy(clients[connfd].username,clients[connfd].buf,MAX_USERNAME_LENGTH);
+        printf("New client connected! UserID:%s \n",clients[connfd].username);
+    }
+    else{
+        printf("wrong!!!!!!!!\n");
+        close(connfd);
+        num_users--;
+    }
+
 };
 
 void Server::dealwithread(int socket){
     //after deal with read data,reset ontshot
-    memset(&message,'\0',MAX_BUF_SIZE);
     if(readMessageFromClient(socket)){
-        printf("message from clinet:%s \n",message);
+        printf("message from %s :%s\n",clients[socket].username,clients[socket].buf);
+        memcpy(clients[socket].buf+strlen(clients[socket].username)+1,clients[socket].buf,strlen(clients[socket].buf));
+        clients[socket].buf[strlen(clients[socket].username)]  = ':';
+        memcpy(clients[socket].buf,clients[socket].username,strlen(clients[socket].username));
         Util::resetEpollOneShot(epollfd,socket);
     }
     else{
-        printf("Unexpected errors encoutered \n");
         Util::removefd(epollfd,socket);
         close(socket);
     }
 };
 
 void Server::dealwithwrite(int socket){
-
+    //分发给所有用户
+    int result = send(socket,clients[socket].write_buf,strlen(clients[socket].write_buf),0);
+    if(result  == -1)
+        std::cout<<"sending not end"<<std::endl;
 };
 
 void Server::listenLoop(){
     //init socket
+    
     struct sockaddr_in address;
     bzero(&address,sizeof(address));
     address.sin_family = AF_INET;
@@ -82,6 +91,8 @@ void Server::listenLoop(){
     address.sin_port = htons(port);
 
     listenfd = socket(PF_INET,SOCK_STREAM,0);
+    int reuse=1;
+    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
     if(listenfd == -1){
         printf("Error:Fail to create socket\n");
         return;
@@ -91,7 +102,7 @@ void Server::listenLoop(){
     int result = 0;
     result = bind(listenfd,(struct sockaddr*)&address,sizeof(address));
     if(result == -1){
-        printf("Error:Fail to bind socke\n");
+        printf("Error:Fail to bind socket\n");
         return;
     }
 
@@ -103,7 +114,6 @@ void Server::listenLoop(){
     }
 
     epoll_event events[MAX_EVENT_NUMBERS+1];
-    client_data* users = new client_data[MAX_EVENT_NUMBERS];
     epollfd = epoll_create(5);
     Util::addfd(epollfd,listenfd);
 
@@ -116,8 +126,7 @@ void Server::listenLoop(){
         for(int i=0;i<result;++i){
             int sockfd = events[i].data.fd;
             if((sockfd == listenfd) &&(events[i].events & EPOLLIN)){
-                printf("Epoll:New client connected!\n");
-                dealwithclient();
+                dealwithclient(sockfd);
             }
             else if(events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)){
                 printf("client disconnected!\n");
@@ -125,11 +134,31 @@ void Server::listenLoop(){
                 break;
             }
             else if(events[i].events & EPOLLIN){
-                printf("Epoll:message from client.\n");
                 dealwithread(sockfd);
-            }
+                epoll_event event;
+                int offset = 0;
+                int index = 0;
+                for(int j=0;j<MAX_EVENT_NUMBERS;++j){
+                    if(clients[j].socket != -1){
+                        offset = j;
+                        break;
+                    }
+                }
+                for(int j=0;j<num_users;++j){
+                    if(sockfd == offset+j) continue;
+                    index = offset+j;
+                    event.data.fd = index;
+                    event.events = EPOLLOUT | EPOLLET;
+                    clients[index].write_buf = clients[sockfd].buf;
+                    epoll_ctl(epollfd,EPOLL_CTL_MOD,index,&event);
+                }
+            }       
             else if(events[i].events & EPOLLOUT){
                 dealwithwrite(sockfd);
+                epoll_event event;
+                event.data.fd = sockfd;
+                event.events = EPOLLIN | EPOLLET;
+                epoll_ctl(epollfd,EPOLL_CTL_MOD,sockfd,&event);
             }
         }
     }

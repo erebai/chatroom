@@ -1,6 +1,6 @@
 CMakeFiles/client.dir/src/client.cpp.o: \
- /ssd/ayb/ChatRoomClient/src/client.cpp /usr/include/stdc-predef.h \
- /usr/include/c++/11/iostream \
+ /ssd/ayb/chatroom/ChatRoomClient/src/client.cpp \
+ /usr/include/stdc-predef.h /usr/include/c++/11/iostream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -171,7 +171,8 @@ CMakeFiles/client.dir/src/client.cpp.o: \
  /usr/include/linux/close_range.h \
  /usr/include/x86_64-linux-gnu/sys/epoll.h \
  /usr/include/x86_64-linux-gnu/bits/epoll.h /usr/include/string.h \
- /usr/include/strings.h /ssd/ayb/ChatRoomClient/include/../include/Util.h \
+ /usr/include/strings.h \
+ /ssd/ayb/chatroom/ChatRoomClient/include/../include/Util.h \
  /usr/include/fcntl.h /usr/include/x86_64-linux-gnu/bits/fcntl.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/linux/falloc.h /usr/include/x86_64-linux-gnu/bits/stat.h \

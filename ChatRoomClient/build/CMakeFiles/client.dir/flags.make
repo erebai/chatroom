@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/ssd/ayb/ChatRoomClient/include
+CXX_INCLUDES = -I/ssd/ayb/chatroom/ChatRoomClient/include
 
 CXX_FLAGS =  -Wall -g -std=gnu++11
 
